@@ -1,0 +1,5 @@
+print("Este es el primer codigo de la clase de programación aplicada")
+a=10
+b=50
+c=a+b
+print(c)
