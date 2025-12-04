@@ -1,0 +1,37 @@
+from machine import ADC, Pin, Timer
+import time
+
+# === CONFIGURAR ADC ===
+adc = ADC(Pin(34))         # Cambia el pin si lo necesitas
+adc.atten(ADC.ATTN_11DB)   # Rango 0–3.3V
+adc.width(ADC.WIDTH_12BIT) # 0–4095
+
+# === CONFIGURAR ARCHIVO CSV ===
+archivo = open("lecturas.csv", "w")
+archivo.write("tiempo_ms,valor_adc\n")
+
+# === VARIABLES DE CONTROL ===
+t0 = time.ticks_ms()   # tiempo inicial
+
+def leer_adc(timer):
+    global archivo, t0
+    t = time.ticks_diff(time.ticks_ms(), t0)
+    valor = adc.read()
+    archivo.write("{},{}\n".format(t, valor))
+    archivo.flush()
+
+# === TIMER SIN SLEEP ===
+#      periodo = 100 ms (10 lecturas por segundo)
+timer = Timer(0)
+timer.init(period=100, mode=Timer.PERIODIC, callback=leer_adc)
+
+print("Midiendo... Presiona Ctrl+C para detener.")
+
+# === ESPERA CONTROLADA POR USUARIO ===
+try:
+    while True:
+        pass
+except KeyboardInterrupt:
+    timer.deinit()
+    archivo.close()
+    print("Medición detenida y archivo CSV guardado.")
